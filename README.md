@@ -10,6 +10,10 @@ Use Node.js 24. Copy `.env.example` to `.env.local` and set the Supabase URL and
 
 Shared database migrations live in `phronec/crm-astra`. Apply the workspace, billing, platform administrator and order settlement migrations there before using this app. Sign in with a verified Supabase account. Every report checks a private grant keyed to the account UUID. Workspace Owner and Admin roles only govern access inside their workspace.
 
+The current overview also requires migrations `202611190010_admin_operations.sql`, `202611190013_platform_analytics.sql` and `202611190019_module_activity.sql` from that repository. Apply shared migrations before deploying the matching console update.
+
+The console uses email/password sign-in. Accounts initially created with Google can set a password in the main Clevia application's password settings before signing in here. The login page links to those settings and to password recovery.
+
 A database operator can look up the intended verified account in Supabase Authentication, verify its UUID and grant access from a privileged SQL session:
 
 ```sql
@@ -19,3 +23,9 @@ where id = '<verified-auth-user-uuid>'::uuid and email_confirmed_at is not null;
 ```
 
 To revoke access, delete the matching row from `private.platform_administrators`. The next database report request checks the grant again. The operator console only needs the publishable key. Its host-scoped HTTP-only session cookie has a separate name from the tenant application's cookie. The read API exposes selected operational fields and records daily access counts per administrator and report in `private.platform_report_access`.
+
+## Activity and billing reports
+
+The overview supports 7-day and 30-day UTC periods. Business module activity counts committed record creates, updates and removals, including document permission changes. It retains workspace, actor, entity UUID, module and timestamp metadata without copying customer messages, campaign content or document names. One workflow can change several records. Collection starts when migration 019 is installed; earlier changes and passive page views are not reconstructed. Failed transactions and unchanged updates do not create activity records. The activity directory can be searched by module or entity UUID and filtered by workspace and UTC dates.
+
+AI activity counts tool operations separately, including successful website screenshots. Internal Clevia AI credits represent the customer allowance. Provider input/output tokens appear only when recorded by the provider; unavailable measurements do not imply zero usage. Payment totals use the manually confirmed settlement date, while pending orders show their current state. These reports do not initiate payment collection.

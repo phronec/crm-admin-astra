@@ -3,14 +3,16 @@ import {analyticsText} from '../lib/analytics-language';
 import {locale} from '../lib/languages';
 import {reportUrl} from '../lib/reports';
 import './analytics.css';
+import ModuleActivity from './ModuleActivity';
 
-export default function UsageAnalytics({data,lang,labels}) {
+export default function UsageAnalytics({data,moduleData,lang,labels}) {
  const t=key=>analyticsText(lang,key),number=value=>new Intl.NumberFormat(locale(lang)).format(value);
  const date=value=>new Intl.DateTimeFormat(locale(lang),{day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
  const range={from:data.from,to:data.to},totals=data.totals,max=Math.max(1,...data.daily.map(row=>row.operations));
  const values=[['screenshots','usage',{q:'capture',state:'charged'}],['credits','usage',{state:'charged'}],['activeUsers','usage',{}],['activeWorkspaces','usage',{}],['newUsers','users',{}],['newWorkspaces','tenants',{}]];
  return <div className="analytics">
   <section className="analytics-period"><h2>{t('period')}</h2><nav aria-label={t('period')}><Link href="/?days=7" aria-current={data.days===7?'page':undefined}>{t('last7')}</Link><Link href="/?days=30" aria-current={data.days===30?'page':undefined}>{t('last30')}</Link></nav><p>{date(data.from)} - {date(data.to)} · UTC</p></section>
+  <ModuleActivity data={moduleData} lang={lang} labels={labels}/>
   <section><h2>{t('usage')}</h2><p className="muted">{t('usageHint')}</p><div className="analytics-metrics">{values.map(([key,section,filter])=><Link className="analytics-metric" href={reportUrl(section,{...range,...filter})} key={key}><span>{t(key)}</span><strong>{number(totals[key==='newUsers'?'registrations':key==='newWorkspaces'?'workspaces':key])}</strong></Link>)}</div></section>
   <section className="analytics-panel"><div className="analytics-section-heading"><h2 id="analytics-daily">{t('daily')}</h2><span>{number(totals.operations)} {t('operations').toLowerCase()}</span></div>
    <div className="analytics-legend">{['completed','failed','pending'].map(key=><span key={key}><i className={'analytics-'+key}/>{t(key)}: {number(totals[key])}</span>)}</div>

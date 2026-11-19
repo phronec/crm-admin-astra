@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { dictionary, locale } from '../lib/languages';
 import { reportUrl } from '../lib/reports';
+import { analyticsText } from '../lib/analytics-language';
 
 const dates = new Set(['created_at','period_start','period_end','last_sign_in_at','settled_at','starts_at','finished_at','expires_at']);
 const translateFields = new Set(['kind','plan','product','status','event','action']);
@@ -11,6 +12,9 @@ export default function ReportValue({ field, row, lang, section }) {
     <Link href={reportUrl('tenants',{workspace:m.workspace_id})}>{m.workspace}</Link> ({t[m.role==='admin'?'roleAdmin':m.role]||m.role})
   </li>)}</ul> : t.none;
   if (value==null || value==='') return field==='expires_at' ? t.noExpiry : '-';
+  if (field==='entity_type') return analyticsText(lang,'entity_'+value);
+  if (field==='module') return t[value]||value;
+  if (field==='event' && String(value).startsWith('Record ')) return analyticsText(lang,value);
   if (dates.has(field)) return <time dateTime={value}>{new Intl.DateTimeFormat(locale(lang),{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'}).format(new Date(value))}</time>;
   if (field==='workspace') return <Link href={reportUrl('tenants',{workspace:row.workspace_id||row.id})}>{value}</Link>;
   if (field==='modules') return value.map(key=>t[key]||key).join(', ');
