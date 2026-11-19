@@ -13,5 +13,6 @@ export default async function Login({ searchParams }) {
       {['setup','access','credentials','unavailable'].includes(error)&&<p role="alert" className="error">{t[error]}</p>}
       <button type="submit">{t.signIn}</button>
     </form>
+    <p className="muted" style={{marginTop:24}}><a href="https://clevia.sk/login/?mode=reset">{lang==='sk'?'Nastaviť alebo obnoviť heslo':'Nastavit nebo obnovit heslo'}</a></p>
   </main>;
 }

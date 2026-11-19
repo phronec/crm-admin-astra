@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { dictionary, locale } from '../lib/languages';
 import { reportUrl } from '../lib/reports';
 
-const dates = new Set(['created_at','period_start','period_end','last_sign_in_at','settled_at','finished_at','expires_at']);
+const dates = new Set(['created_at','period_start','period_end','last_sign_in_at','settled_at','starts_at','finished_at','expires_at']);
 const translateFields = new Set(['kind','plan','product','status','event','action']);
 
 export default function ReportValue({ field, row, lang, section }) {
@@ -18,7 +18,7 @@ export default function ReportValue({ field, row, lang, section }) {
   if (field==='verified') return value ? t.yes : t.no;
   if (field==='amount_czk') return new Intl.NumberFormat(locale(lang),{style:'currency',currency:'CZK'}).format(value);
   if (['units','remaining','credits','members'].includes(field)) return new Intl.NumberFormat(locale(lang)).format(value);
-  if (field==='id' && (section==='pending'||section==='payments')) return <Link href={'/payments/'+value} aria-label={t.review+' '+value}>{value}</Link>;
+  if (field==='order_id' || (field==='id' && (section==='pending'||section==='payments'))) return <Link href={'/payments/'+value} aria-label={t.review+' '+value}>{value}</Link>;
   if (translateFields.has(field)) {
     const label=Object.hasOwn(t,value) ? t[value] : String(value);
     return field==='status' ? <span className="badge">{label}</span> : label;
